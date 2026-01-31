@@ -1,0 +1,28 @@
+services:
+  mongo:
+    image: mongo:5.0
+    container_name: solar-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpass
+      MONGO_INITDB_DATABASE: solardb
+    volumes:
+      - mongo_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    ports:
+      - "27017:27017"
+
+  app:
+    build: .
+    container_name: solar-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URI: mongodb://solaruser:solarpass@solar-mongo:27017/solardb?authSource=solardb
+    depends_on:
+      - mongo
+
+volumes:
+  mongo_data:
